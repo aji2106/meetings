@@ -1,5 +1,6 @@
 from django.db import models
 from scheduler.utils.functions import get_first_letters_of_active_days
+from django.utils import timezone
 
 
 class Schedule(models.Model):
@@ -14,6 +15,19 @@ class Schedule(models.Model):
             self.start_time.strftime("%H:%M"),
             self.end_time.strftime("%H:%M")
         )
+
+    @staticmethod
+    def get_active_model(start_hour=7, end_hour=17, days=31):
+        """Get the only Schedule model instance (or create one if it doesn't exist yet)"""
+        schedule = Schedule.objects.order_by('-pk').first()
+        if not schedule:
+            schedule = Schedule(
+                start_time=timezone.datetime(1, 1, 1, start_hour, 0, 0).time(),
+                end_time=timezone.datetime(1, 1, 1, end_hour, 0, 0).time(),
+                days=days
+            )
+            schedule.save()
+        return schedule
 
 
 class Meeting(models.Model):

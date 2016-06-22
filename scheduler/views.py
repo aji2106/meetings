@@ -5,7 +5,7 @@ from .models import Meeting, Schedule
 from .utils.functions import get_active_days_indices, get_active_days_names, days_bit
 
 
-def __render_error_message(_message, _request, _template, _context, _meeting_id=None):
+def __render_error_message(_message, _request, _template, _context):
     # Add default values for instructions
     schedule = Schedule.get_active_model()
     _context['schedule'] = schedule
@@ -84,6 +84,7 @@ def meeting_config(request):
 
 
 def meeting_edit(request, meeting_id):
+    """Show form Meeting settings for an existing Meeting model"""
     try:
         schedule = Schedule.get_active_model()
         meeting = get_object_or_404(Meeting, pk=meeting_id)
@@ -110,6 +111,7 @@ def meeting_edit(request, meeting_id):
 
 
 def meeting_save(request, meeting_id=None):
+    """Update or create new Meeting and save the settings"""
     try:
         context = request.POST.dict()
         schedule = Schedule.get_active_model()

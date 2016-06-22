@@ -17,7 +17,7 @@ class Schedule(models.Model):
         )
 
     @staticmethod
-    def get_active_model(start_hour=7, end_hour=17, days=31):
+    def get_active_model(start_hour=0, end_hour=0, days=127):
         """Get the only Schedule model instance (or create one if it doesn't exist yet)"""
         schedule = Schedule.objects.order_by('-pk').first()
         if not schedule:
@@ -42,3 +42,12 @@ class Meeting(models.Model):
             self.start_time.strftime("%H:%M"),
             self.end_time.strftime("%H:%M")
         )
+
+    @staticmethod
+    def get_future_meetings(limit=None):
+        """Get list of upcoming meetings, order chronologically. If limit parameter is not set, return all"""
+        today = timezone.datetime.today()
+        meetings = Meeting.objects.order_by('date', 'start_time').filter(date__gte=today)
+        if limit and limit >= 0:
+            meetings = meetings[:limit + 1]
+        return meetings

@@ -1,0 +1,70 @@
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'scheduler/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'scheduler/css/jquery-ui.css' %}">
+<link rel="stylesheet" href="{% static 'scheduler/css/jquery.timepicker.css' %}">
+<link rel="stylesheet" href="{% static 'scheduler/css/style.css' %}">
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-8">
+      <form action="{% url 'scheduler:schedule_save' %}" method="post" id="schedule-form">
+        {% csrf_token %}
+        <p>Meeting room is available on:</p>
+
+        {% if schedule %}
+          <span class="hint">Those changes won't affect or limit any existing meetings.</span>
+        {% endif %}
+
+        <ul id="days-cb-list">
+          <li>
+            <label><input id="monday" type="checkbox" name="monday" value="monday" {% if monday %}checked="checked"{% endif %}>Monday</label>
+          </li>
+          <li>
+            <label><input id="tuesday" type="checkbox" name="tuesday" value="tuesday" {% if tuesday %}checked="checked"{% endif %}>Tuesday</label>
+          </li>
+          <li>
+            <label><input id="wednesday" type="checkbox" name="wednesday" value="wednesday" {% if wednesday %}checked="checked"{% endif %}>Wednesday</label>
+          </li>
+          <li>
+            <label><input id="thursday" type="checkbox" name="thursday" value="thursday" {% if thursday %}checked="checked"{% endif %}>Thursday</label>
+           <li>
+            <label><input id="friday" type="checkbox" name="friday" value="friday" {% if friday %}checked="checked"{% endif %}>Friday</label>
+          </li>
+          <li>
+            <label><input id="saturday" type="checkbox" name="saturday" value="saturday" {% if saturday %}checked="checked"{% endif %}>Saturday</label>
+          </li>
+          <li>
+            <label><input id="sunday" type="checkbox" name="sunday" value="sunday" {% if sunday %}checked="checked"{% endif %}>Sunday</label>
+          </li>
+        </ul>
+
+        <label>From: <input id="start_time" type="text" name="start_time"></label><br>
+        <label>To: <input id="end_time" type="text" name="end_time"></label><br>
+
+        {% if error_message %}
+          <p><strong id="error-message">{{ error_message }}</strong></p>
+        {% endif %}
+
+        {# Add Save button #}
+        <input type="submit" value="Save" class="btn btn-success" role="button">
+        <a type="submit" href="{% url 'scheduler:index' %}" class="btn btn-default" role="button">Back</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="application/javascript" src="{% static 'scheduler/js/jquery-2.1.4.js' %}"></script>
+<script type="application/javascript" src="{% static 'scheduler/js/bootstrap.min.js' %}"></script>
+<script type="application/javascript" src="{% static 'scheduler/js/jquery.timepicker.js' %}"></script>
+
+<script type="application/javascript">
+    $(document).ready(function () {
+      $('#start_time').timepicker({ 'step': 15, 'timeFormat': 'H:i' });
+      $('#end_time').timepicker({ 'step': 15, 'timeFormat': 'H:i', 'showDuration': true, 'show2400': true });
+
+      {% if schedule %}
+        $('#start_time').timepicker('setTime', new Date(0, 0, 0, {{schedule.start_time.hour}}, {{schedule.start_time.minute}}, {{schedule.start_time.second}}, 0));
+        $('#end_time').timepicker('setTime', new Date(0, 0, 0, {{schedule.end_time.hour}}, {{schedule.end_time.minute}}, {{schedule.end_time.second}}, 0));
+      {% endif %}
+    });
+</script>

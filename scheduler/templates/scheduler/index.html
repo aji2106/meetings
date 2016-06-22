@@ -1,0 +1,35 @@
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'scheduler/css/bootstrap.min.css' %}">
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-8">
+      <h2>Meeting Scheduler:</h2>
+      <div>
+        <h3>Meeting room is available on: </h3>
+        <h4>{{ scheduled_days }} between {{ schedule.start_time|time:"H:i" }} and {{ schedule.end_time|time:"H:i" }}.</h4>
+        <a href="{% url 'scheduler:schedule_config' %}" class="btn btn-info">Edit Schedule</a>
+      </div>
+      <div>
+        <h3>Scheduled meetings: </h3>
+        {% if future_meetings %}
+          <ul>
+          {% for meeting in future_meetings %}
+            <li>
+                <a href="{% url 'scheduler:meeting_edit' meeting.id %}">
+                  {{ meeting.date|date:"l" }} [ {{ meeting.date|date:"d.n.Y" }} ] between {{ meeting.start_time|time:"H:i" }} and {{ meeting.end_time|time:"H:i" }}
+                </a>
+            </li>
+          {% endfor %}
+          </ul>
+        {% else %}
+          <span>[ There is no scheduled meetings ]</span><br>
+        {% endif %}
+        <br><a href="{% url 'scheduler:meeting_config' %}" class="btn btn-info" role="button">Schedule new meeting</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>

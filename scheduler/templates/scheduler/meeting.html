@@ -1,0 +1,84 @@
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'scheduler/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'scheduler/css/jquery-ui.css' %}">
+<link rel="stylesheet" href="{% static 'scheduler/css/jquery.timepicker.css' %}">
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-8">
+      <h2>Schedule meeting room: </h2>
+      <h4>{{ scheduled_days }} between {{ schedule.start_time|time:"H:i" }} and {{ schedule.end_time|time:"H:i" }}.</h4>
+
+      {% if meeting %}
+      <form action="{% url 'scheduler:meeting_save' meeting.id %}" method="post">
+      {% else %}
+      <form action="{% url 'scheduler:meeting_save_new' %}" method="post">
+      {% endif %}
+        {% csrf_token %}
+        <p>Reserve meeting room for:</p>
+
+        <label>Date: <input type="text" name="date" id="date" value="{{ meeting.date|date:'d.m.Y' }}"/></label><br>
+
+        <label>From: <input id="start_time" type="text" name="start_time" value="{{ meeting.start_time|time:'H:i'}}"></label><br>
+        <label>To: <input id="end_time" type="text" name="end_time" value="{{ meeting.end_time|time:'H:i' }}"></label><br>
+
+        {% if error_message %}
+          <p><strong id="error-message">{{ error_message }}</strong></p>
+        {% endif %}
+
+        {# Add Save button #}
+        <input type="submit" value="Save" role="button" class="btn btn-success">
+
+        {# Add Delete button #}
+        {% if meeting %}
+          <a role="button" class="btn btn-danger" href="{% url 'scheduler:meeting_delete' meeting.id %}">Delete</a>
+        {% endif %}
+        <a type="submit" href="{% url 'scheduler:index' %}" class="btn btn-default" role="button">Back</a>
+      </form>
+      <hr>
+      <h3>Scheduled meetings: </h3>
+        {% if future_meetings %}
+          <ul>
+          {% for meeting in future_meetings %}
+            <li>
+                <a href="{% url 'scheduler:meeting_edit' meeting.id %}">
+                  {{ meeting.date|date:"l" }} [ {{ meeting.date|date:"d.n.Y" }} ] between {{ meeting.start_time|time:"H:i" }} and {{ meeting.end_time|time:"H:i" }}
+                </a>
+            </li>
+          {% endfor %}
+          </ul>
+        {% else %}
+          <span>[ There is no scheduled meetings ]</span><br>
+        {% endif %}
+    </div>
+  </div>
+</div>
+
+
+<script type="application/javascript" src="{% static 'scheduler/js/jquery-2.1.4.js' %}"></script>
+<script type="application/javascript" src="{% static 'scheduler/js/jquery-ui.js' %}"></script>
+<script type="application/javascript" src="{% static 'scheduler/js/bootstrap.min.js' %}"></script>
+<script type="application/javascript" src="{% static 'scheduler/js/jquery.timepicker.js' %}"></script>
+<script type="application/javascript">
+    $(document).ready(function () {
+      $('#start_time').timepicker({'step': 15, 'timeFormat': 'H:i'});
+      $('#end_time').timepicker({'step': 15, 'timeFormat': 'H:i'});
+
+      function available(date) {
+        if ($.inArray(date.getDay(), {{ active_days_indices }}) != -1) {
+          return [true, "","Available"];
+        } else {
+          return [false,"","unAvailable"];
+        }
+      };
+
+      $('#date').datepicker({beforeShowDay: available, minDate: new Date()});
+      $('#date').datepicker('option', 'dateFormat', 'dd.mm.yy');
+
+      {% if meeting %}
+        $('#date').datepicker('setDate', new Date('{{ meeting.date|date:"j F Y" }}'));
+        $('#start_time').timepicker('setTime', new Date(0, 0, 0, {{meeting.start_time.hour}}, {{meeting.start_time.minute}}, 0, 0));
+        $('#end_time').timepicker('setTime', new Date(0, 0, 0, {{meeting.end_time.hour}}, {{meeting.end_time.minute}}, 0, 0));
+      {% endif %}
+    });
+</script>
